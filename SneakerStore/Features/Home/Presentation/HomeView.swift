@@ -9,11 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     
-    let products = [
-        Product(id: 1, name: "Nike Air Motion", brand: "Nike", image: "https://i.imgur.com/E8ZBAnC.png", price: 122.64),
-        
-        Product(id: 2, name: "Nike Air Motion", brand: "Nike", image: "https://i.imgur.com/E8ZBAnC.png", price: 122.64)
-    ]
+    @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
         VStack {
@@ -42,20 +38,35 @@ struct HomeView: View {
                         .background(.white)
                         .clipShape(Circle())
                 }
-
+                
             }
             .padding()
             
-            ScrollView {
-                VStack {
-                    Banner()
-                    ProductList(products: products)
+            
+            ZStack {
+                ScrollView {
+                    VStack {
+                        Banner()
+                        if !viewModel.state.isLoading {
+                            ProductList(products: viewModel.state.products)
+                            
+                        }
+                    }
                 }
-                
+                if viewModel.state.isLoading {
+                    VStack {
+                        ProgressView()
+
+                    }
+                }
             }
             
         }
         .background(.gray.opacity(0.1))
+        .task {
+            await viewModel.getProducts()
+            
+        }
     }
 }
 
